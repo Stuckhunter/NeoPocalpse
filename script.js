@@ -305,8 +305,7 @@ const STEPS = [
   { k:'kneel' },
   { k:'d', tag:'CHAPTER 10 // THE BLOOD DRIVE', text:'When he is ready, Kystos rises and continues down the crimson highway. Take a slow walk; no one can harm you here.', btn:'ENTER BLOOD DRIVE' },
   { k:'z', z:9 },
-  { k:'credits' },
-  { k:'boss' }
+  { k:'credits' }
 ];
 
 /* ============ GLOBAL STATE ============ */
@@ -327,12 +326,10 @@ function nextStep() {
   else if (s.k === 'boat') startBoat();
   else if (s.k === 'kneel') startKneel();
   else if (s.k === 'credits') startCredits();
-  else if (s.k === 'boss') startBoss();
 }
 function clickBtn(fn) { return e => { e.currentTarget.blur(); fn(); }; }
 $('start-btn').addEventListener('click', clickBtn(startGame));
 $('dlg-btn').addEventListener('click', clickBtn(() => advanceDialog()));
-$('credits-menu-btn').addEventListener('click', clickBtn(nextStep));
 
 /* ============ DIALOGUE ============ */
 const D = { text: '', i: 0, done: false };
@@ -966,14 +963,6 @@ function renderBoat() {
 
 /* ============ KYSTOS CINEMATIC ============ */
 const K = { t: 0 };
-const BF = {
-  t: 0, started: false, won: false, bossHp: 12, maxBossHp: 12, bossHitCd: 0, bossFlash: 0,
-  playerX: 70, playerY: H - 139, playerVY: 0, facing: 'right', grounded: true,
-  lives: 5, inv: 0, slashCd: 0, slashT: 0, shotCd: 0, shots: [], bossShots: []
-};
-const bossArtwork = new Image();
-bossArtwork.onerror = () => console.error('Could not load the boss image at boss.png.');
-bossArtwork.src = 'boss.png';
 function startKneel() {
   mode = 'kneel'; showScene('game-scene');
   $('game-scene').style.background = '#450a0a';
@@ -990,13 +979,14 @@ function updateKneel() {
   if (pressed.Enter || pressed.Space) nextStep();
 }
 function drawKneelingKystos(g, x, ground, t) {
-  g.save(); g.translate(x, ground);
-  g.fillStyle = 'rgba(0,0,0,.35)'; g.beginPath(); g.ellipse(0, -2, 55, 9, 0, 0, Math.PI * 2); g.fill();
+  g.save(); g.translate(x, ground); g.scale(1.35, 1.35);
+  g.fillStyle = 'rgba(0,0,0,.35)'; g.beginPath(); g.ellipse(-10, -2, 58, 9, 0, 0, Math.PI * 2); g.fill();
   g.fillStyle = '#241936'; g.beginPath();
-  g.moveTo(-8, -72); g.lineTo(-24, -54); g.lineTo(-60, -8); g.lineTo(-28, -3); g.lineTo(-3, -36); g.closePath(); g.fill();
+  g.moveTo(-8, -72); g.lineTo(-24, -54); g.lineTo(-62, -8); g.lineTo(-35, -5); g.lineTo(-3, -36); g.closePath(); g.fill();
   g.strokeStyle = '#181524'; g.lineWidth = 15; g.lineCap = 'round'; g.lineJoin = 'round';
-  g.beginPath(); g.moveTo(-5, -38); g.lineTo(-18, -20); g.lineTo(-30, -6); g.lineTo(-12, -6); g.stroke();
-  g.beginPath(); g.moveTo(5, -38); g.lineTo(18, -20); g.lineTo(14, -6); g.lineTo(34, -6); g.stroke();
+  g.beginPath(); g.moveTo(3, -38); g.lineTo(-9, -22); g.lineTo(-21, -9); g.lineTo(-43, -9); g.stroke();
+  g.beginPath(); g.moveTo(-5, -38); g.lineTo(-21, -23); g.lineTo(-34, -9); g.lineTo(-54, -9); g.stroke();
+  g.fillStyle = '#3b2859'; g.beginPath(); g.arc(-15, -21, 7, 0, Math.PI * 2); g.fill();
   g.fillStyle = '#14111f'; g.beginPath();
   g.moveTo(-14, -78); g.lineTo(12, -78); g.lineTo(17, -42); g.lineTo(-5, -32); g.lineTo(-20, -48); g.closePath(); g.fill();
   g.strokeStyle = '#241936'; g.lineWidth = 8;
@@ -1029,142 +1019,16 @@ function renderKneel() {
   cx.fillStyle = 'rgba(0,0,0,.12)'; for (let y = 0; y < H; y += 3) cx.fillRect(0, y, W, 1);
 }
 
-/* ============ FINAL BOSS FIGHT ============ */
-function startBoss() {
-  mode = 'boss'; showScene('game-scene');
-  $('game-scene').style.background = '#101820';
-  $('hZone').textContent = 'FINAL BOSS // THE LAST QUESTION';
-  $('hLives').textContent = ''; $('hDist').textContent = '';
-  $('hScore').textContent = ''; $('hCombo').textContent = ''; $('hCd').textContent = '';
-  $('drone-upload-label').style.display = 'none';
-  $('hint').textContent = 'A/D: move | W/SPACE: jump | J: slash | L: blaster';
-  BF.t = 0; BF.started = false; BF.won = false; BF.bossHp = BF.maxBossHp;
-  BF.bossHitCd = 0; BF.bossFlash = 0; BF.playerX = 70; BF.playerY = H - 139;
-  BF.playerVY = 0; BF.facing = 'right'; BF.grounded = true;
-  BF.lives = 5; BF.inv = 0; BF.slashCd = 0; BF.slashT = 0; BF.shotCd = 0;
-  BF.shots = []; BF.bossShots = [];
-}
-function damageBoss() {
-  if (BF.bossHitCd > 0 || BF.won) return;
-  BF.bossHp = Math.max(0, BF.bossHp - 1);
-  BF.bossHitCd = 14; BF.bossFlash = 8;
-  sfx(180, 0.12, 'square', 0.06, -80);
-  if (BF.bossHp === 0) BF.won = true;
-}
-function updateBoss() {
-  if (pressed.KeyM) muted = !muted;
-  if (!BF.started) {
-    if (pressed.Enter || pressed.Space) BF.started = true;
-    return;
-  }
-  if (BF.won) { if (pressed.Enter) toTitle(); return; }
-  if (BF.lives <= 0) {
-    if (pressed.Enter) startBoss();
-    else if (pressed.Escape) toTitle();
-    return;
-  }
-  if (pressed.Escape) { toTitle(); return; }
-  BF.t++;
-  if (BF.inv > 0) BF.inv--;
-  if (BF.slashCd > 0) BF.slashCd--;
-  if (BF.slashT > 0) BF.slashT--;
-  if (BF.shotCd > 0) BF.shotCd--;
-  if (BF.bossHitCd > 0) BF.bossHitCd--;
-  if (BF.bossFlash > 0) BF.bossFlash--;
-
-  const left = keys.KeyA || keys.ArrowLeft, right = keys.KeyD || keys.ArrowRight;
-  if (left && !right) { BF.playerX -= 4.8; BF.facing = 'left'; }
-  else if (right && !left) { BF.playerX += 4.8; BF.facing = 'right'; }
-  BF.playerX = Math.max(20, Math.min(720, BF.playerX));
-  if ((pressed.Space || pressed.KeyW || pressed.ArrowUp) && BF.grounded) {
-    BF.playerVY = -11; BF.grounded = false;
-  }
-  BF.playerVY = Math.min(BF.playerVY + 0.6, 14);
-  BF.playerY += BF.playerVY;
-  if (BF.playerY >= H - 139) { BF.playerY = H - 139; BF.playerVY = 0; BF.grounded = true; }
-
-  if (keys.KeyJ && BF.slashCd === 0) {
-    BF.slashCd = 24; BF.slashT = 12;
-    if (BF.playerX > 420 && BF.playerX < 620) damageBoss();
-  }
-  if (keys.KeyL && BF.shotCd === 0) {
-    BF.shotCd = 28; BF.shots.push({ x: BF.playerX + 34, y: BF.playerY + 24 });
-    sfx(680, 0.08, 'square', 0.035, -300);
-  }
-  if (BF.t % 82 === 0) BF.bossShots.push({ x: 735, y: 295 + Math.random() * 45 });
-  for (let i = BF.shots.length - 1; i >= 0; i--) {
-    const shot = BF.shots[i]; shot.x += 9;
-    if (shot.x >= 500) { damageBoss(); BF.shots.splice(i, 1); }
-    else if (shot.x > W) BF.shots.splice(i, 1);
-  }
-  for (let i = BF.bossShots.length - 1; i >= 0; i--) {
-    const shot = BF.bossShots[i]; shot.x -= 6;
-    if (BF.inv === 0 && shot.x < BF.playerX + 36 && shot.x > BF.playerX && shot.y > BF.playerY && shot.y < BF.playerY + 54) {
-      BF.lives--; BF.inv = 75; sfx(100, 0.2, 'sawtooth', 0.06, -60); BF.bossShots.splice(i, 1);
-    } else if (shot.x < -20) BF.bossShots.splice(i, 1);
-  }
-  $('hLives').textContent = 'KYSTOS: ' + BF.lives;
-  $('hDist').textContent = 'BOSS: ' + BF.bossHp + '/' + BF.maxBossHp;
-}
-function renderBoss() {
-  cx.clearRect(0, 0, W, H);
-  cx.fillStyle = '#172328'; cx.fillRect(0, 0, W, H);
-  if (bossArtwork.complete && bossArtwork.naturalWidth) cx.drawImage(bossArtwork, 0, 0, W, 365);
-  cx.fillStyle = 'rgba(5,9,13,.35)'; cx.fillRect(0, 0, W, 365);
-  cx.fillStyle = '#263331'; cx.fillRect(0, 365, W, 85);
-  cx.fillStyle = '#809080'; cx.fillRect(0, 365, W, 4);
-
-  const barW = 460, barX = (W - barW) / 2;
-  cx.fillStyle = 'rgba(0,0,0,.75)'; cx.fillRect(barX, 15, barW, 16);
-  cx.fillStyle = '#ef4444'; cx.fillRect(barX + 2, 17, (barW - 4) * BF.bossHp / BF.maxBossHp, 12);
-  centerText('THE MACHINE', 52, 9, '#fff1f2');
-  if (BF.bossFlash > 0) { cx.fillStyle = 'rgba(255,255,255,.35)'; cx.fillRect(0, 0, W, 365); }
-
-  for (const shot of BF.bossShots) {
-    cx.fillStyle = 'rgba(239,68,68,.35)'; cx.beginPath(); cx.arc(shot.x, shot.y, 13, 0, Math.PI * 2); cx.fill();
-    cx.fillStyle = '#f87171'; cx.beginPath(); cx.arc(shot.x, shot.y, 6, 0, Math.PI * 2); cx.fill();
-  }
-  for (const shot of BF.shots) {
-    cx.fillStyle = '#38bdf8'; cx.fillRect(shot.x, shot.y, 16, 8);
-    cx.fillStyle = '#e0f2fe'; cx.fillRect(shot.x + 5, shot.y + 2, 6, 4);
-  }
-  if (!(BF.inv > 0 && Math.floor(BF.t / 5) % 2 === 0)) {
-    const moving = keys.KeyA || keys.KeyD || keys.ArrowLeft || keys.ArrowRight;
-    const frames = moving ? anims.run : anims.idle;
-    const fr = frames[Math.floor(BF.t / (moving ? 7 : 16)) % frames.length];
-    drawSprite(cx, BF.playerX + 18, BF.playerY + 54, BF.facing, fr);
-  }
-  if (BF.slashT > 0) {
-    cx.strokeStyle = 'rgba(167,243,208,.85)'; cx.lineWidth = 8; cx.beginPath();
-    cx.arc(BF.playerX + (BF.facing === 'right' ? 45 : -9), BF.playerY + 24, 38, -1.2, 1.2); cx.stroke();
-  }
-
-  if (!BF.started || BF.won || BF.lives <= 0) {
-    cx.fillStyle = 'rgba(0,0,0,.5)'; cx.fillRect(0, 0, W, H);
-    if (!BF.started) {
-      centerText('IF YOU KILL THE BOSS...', 85, 11, '#fecaca');
-      centerText('CAN YOU BRING EVERYONE BACK?', 115, 9, '#fff1f2');
-      centerText('[ENTER] BEGIN THE FIGHT', 400, 8, '#e2a856');
-    } else if (BF.won) {
-      centerText('THE BOSS HAS FALLEN', 180, 16, '#fde68a');
-      centerText('CAN HE BRING THEM BACK?', 225, 10, '#fecaca');
-      centerText('[ENTER] RETURN TO TITLE', 285, 8, '#d4cbb8');
-    } else {
-      centerText('KYSTOS HAS FALLEN', 180, 16, '#ef4444');
-      centerText('[ENTER] TRY AGAIN', 240, 9, '#e2a856');
-      centerText('[ESC] RETURN TO TITLE', 275, 8, '#d4cbb8');
-    }
-  }
-}
-
 /* ============ ENDING: SLOW SCROLLING STORY ============ */
 const C = { y: 0, t: 0, end: false, endT: 0, stars: [], kx: -80 };
 function startCredits() {
   mode = 'credits'; showScene('credits-scene');
   C.y = window.innerHeight + 30; C.t = 0; C.end = false; C.endT = 0; C.kx = -80;
   C.stars = []; for (let i = 0; i < 140; i++) C.stars.push({ x: Math.random(), y: Math.random() * 0.75, s: Math.random() < 0.15 ? 2 : 1, ph: Math.random() * 6 });
+  const alternateEnding = falls >= 20;
+  $('credits-original').hidden = alternateEnding;
+  $('credits-alternate').hidden = !alternateEnding;
   $('credits-stats').textContent = `FINAL SCORE: ${score}   FALLS: ${falls}`;
-  $('credits-menu-btn').classList.remove('show');
   $('credits-content').style.transform = `translateX(-50%) translateY(${C.y}px)`;
 }
 function updateCredits() {
@@ -1178,8 +1042,7 @@ function updateCredits() {
     if (C.y + el.offsetTop + el.offsetHeight / 2 <= window.innerHeight / 2) { C.end = true; C.endT = 0; }
   } else {
     C.endT++;
-    if (C.endT > 150) $('credits-menu-btn').classList.add('show');
-    if (C.endT > 150 && pressed.Enter) nextStep();
+    if (C.endT > 150) nextStep();
   }
   const maxX = window.innerWidth * 0.72;
   if (C.kx < maxX) C.kx += 0.14;
@@ -1218,14 +1081,12 @@ function stepOnce() {
   else if (mode === 'zone') updateZone();
   else if (mode === 'boat') updateBoat();
   else if (mode === 'kneel') updateKneel();
-  else if (mode === 'boss') updateBoss();
   else if (mode === 'credits') updateCredits();
 }
 function render() {
   if (mode === 'zone') renderZone();
   else if (mode === 'boat') renderBoat();
   else if (mode === 'kneel') renderKneel();
-  else if (mode === 'boss') renderBoss();
   else if (mode === 'credits') renderCredits();
 }
 let last = performance.now(), acc = 0;
