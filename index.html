@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NEOPOCALYPSE: THE ODYSSEY</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- TITLE -->
+  <div id="title-scene" class="scene">
+    <div class="title-frame">
+      <h1 class="main-title">NEOPOCALYPSE</h1>
+      <h2 class="sub-title">THE ODYSSEY</h2>
+    </div>
+    <div class="menu-bar"><button id="start-btn">&#9654; PRESS START</button></div>
+    <div class="controls-list">
+      <b>[A/D]</b> MOVE &nbsp; <b>[W/SPACE]</b> JUMP (TAP TWICE = DOUBLE JUMP) &nbsp; <b>[SHIFT]</b> SPRINT<br>
+      <b>[J]</b> SLASH &nbsp; <b>[K]</b> DASH &nbsp; <b>[L]</b> BLASTER &nbsp; <b>[&#8595;]</b> GROUND SLAM &nbsp; <b>[S]</b> GRAPPLE<br>
+      <b>[P]</b> PAUSE &nbsp; <b>[M]</b> MUTE &nbsp; <b>[R]</b> RESTART ZONE &nbsp; <b>[ENTER]</b> CONTINUE
+    </div>
+  </div>
+
+  <!-- DIALOGUE (shared by every chapter) -->
+  <div id="dialog-scene" class="scene hidden">
+    <div class="game-container">
+      <div class="dialog-box">
+        <div class="chapter-tag" id="dlg-tag"></div>
+        <p class="story-text" id="dlg-text"></p>
+        <div class="dialog-footer">
+          <span class="dialog-hint">[ENTER]</span>
+          <button id="dlg-btn">NEXT &#9654;</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GAME (all zones + boat cinematic share this canvas) -->
+  <div id="game-scene" class="scene hidden">
+    <div class="hud-bar">
+      <span id="hZone">ZONE</span>
+      <span id="hLives"></span>
+      <span id="hDist"></span>
+      <span id="hScore"></span>
+      <span id="hCombo"></span>
+      <span id="hCd"></span>
+      <label for="drone-sheet-input" class="upload-btn" id="drone-upload-label">UPLOAD DRONE IMG</label>
+      <input type="file" id="drone-sheet-input" class="sheet-input" accept="image/*" />
+    </div>
+    <canvas id="gameCanvas" width="800" height="450"></canvas>
+    <div class="controls-hud" id="hint"></div>
+  </div>
+
+  <!-- ENDING -->
+  <div id="credits-scene" class="scene hidden">
+    <canvas id="creditsBg"></canvas>
+    <div class="skip-hint">HOLD [SPACE] OR [&#8595;] TO SCROLL FASTER</div>
+    <div class="credits-viewport">
+      <div class="credits-content" id="credits-content">
+        <h2>NEOPOCALYPSE: THE ODYSSEY</h2>
+        <p>At the end, does he make it? I mean the character—his name is Kystos.</p>
+        <p>Did you even know him? You've been with him for 11 years now. Yeah, 11, and you never bothered to ask his name.</p>
+        <p>He protected you from zombies, drones, and rogue droids, and you don't even thank him.</p>
+        <p>Who knows if he'll find any survivors, or if he's even alive?</p>
+        <p>He was hoping his wife and children were waiting for him on the other side.</p>
+        <br>
+        <p>He gave me one last message:</p>
+        <blockquote>“Why do you idolize one person? What do they ever say to you? Do they help you? Never! BE YOUR OWN PERSON. Trying to be someone else will get you NOWHERE. Stay alive, friend, and help society bounce back.”</blockquote>
+        <p>— Kystos</p>
+        <br><br>
+        <p class="stats" id="credits-stats"></p>
+        <br><br>
+        <p id="credits-end" style="color:#e2a856; font-size:0.9rem;">THE END</p>
+      </div>
+    </div>
+    <button id="credits-menu-btn" class="credits-footer-btn">RETURN TO TITLE</button>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>0

@@ -1,0 +1,87 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+* { box-sizing: border-box; }
+
+body {
+  background-color: #0d0f12; color: #d4cbb8;
+  font-family: 'Press Start 2P', monospace;
+  display: flex; justify-content: center; align-items: center;
+  height: 100vh; margin: 0; overflow: hidden;
+}
+
+.scene {
+  width: 100%; height: 100%; position: absolute;
+  display: flex; flex-direction: column; justify-content: center; align-items: center;
+  opacity: 1; transition: opacity 0.6s ease-in-out;
+}
+.scene.hidden { opacity: 0; pointer-events: none; }
+
+/* Title */
+#title-scene { background: linear-gradient(to bottom, #161b26 0%, #242936 55%, #3d2824 85%, #121011 100%); }
+.title-frame {
+  border: 4px solid #4a4542; outline: 4px solid #090a0c;
+  background: rgba(13, 15, 18, 0.75); padding: 40px 32px; text-align: center;
+  box-shadow: 0 10px 0 #07080a; max-width: 90%;
+  animation: flicker 4s infinite;
+}
+@keyframes flicker { 0%,92%,100%{opacity:1} 93%{opacity:.7} 95%{opacity:1} 97%{opacity:.8} }
+.main-title {
+  font-size: clamp(1.4rem, 4vw, 3rem); color: #b84a39; margin: 0 0 16px 0;
+  letter-spacing: 3px; text-shadow: 4px 4px 0 #090a0c, -2px -2px 0 #7a828e;
+}
+.sub-title { font-size: clamp(0.8rem, 2vw, 1.3rem); color: #e2a856; margin: 0; letter-spacing: 5px; text-shadow: 3px 3px 0 #090a0c; }
+.menu-bar { margin-top: 32px; text-align: center; }
+.controls-list { margin-top: 24px; font-size: 0.5rem; line-height: 2.2; color: #7a828e; text-align: center; max-width: 92vw; }
+.controls-list b { color: #e2a856; font-weight: normal; }
+
+button {
+  background-color: #1c1a1d; color: #e2a856; border: 4px solid #6e352c; outline: 2px solid #090a0c;
+  padding: 14px 24px; font-size: 0.85rem; font-family: 'Press Start 2P', monospace; cursor: pointer;
+  text-transform: uppercase; letter-spacing: 1px; box-shadow: inset 0 0 0 2px #3b2d2a; display: inline-block;
+}
+button:hover { background-color: #6e352c; color: #fff3d6; border-color: #e2a856; }
+button:active { transform: translateY(3px); }
+.upload-btn {
+  background-color: #1c1a1d; color: #e2a856; border: 3px solid #6e352c; padding: 4px 8px;
+  font-size: 0.5rem; cursor: pointer; display: inline-block;
+}
+.upload-btn:hover { background-color: #6e352c; color: #fff3d6; }
+.sheet-input { display: none; }
+
+/* Dialogue */
+#dialog-scene { background: radial-gradient(ellipse at center, #1a1d26 0%, #0d0f12 80%); }
+.game-container { max-width: 720px; width: 90%; padding: 1rem; line-height: 1.9; }
+.dialog-box { background: #16181d; border: 4px solid #596270; padding: 28px; box-shadow: inset 0 0 0 4px #0d0f12; display: flex; flex-direction: column; }
+.chapter-tag { color: #b84a39; font-size: 0.85rem; margin-bottom: 18px; }
+.story-text { font-size: 0.9rem; margin: 0 0 28px 0; color: #d4cbb8; min-height: 7.5em; }
+.dialog-footer { display: flex; justify-content: flex-end; align-items: center; gap: 16px; }
+.dialog-hint { font-size: 0.5rem; color: #596270; }
+
+/* Game */
+#game-scene { background: #090a0c; }
+.hud-bar {
+  width: 800px; max-width: 95vw; display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 8px; font-size: 0.5rem; color: #e2a856; gap: 4px; flex-wrap: wrap;
+}
+canvas#gameCanvas {
+  border: 4px solid #4a4542; outline: 4px solid #050507; background: transparent;
+  image-rendering: pixelated; max-width: 95vw; max-height: 72vh;
+}
+.controls-hud { margin-top: 10px; font-size: 0.5rem; color: #7a828e; letter-spacing: 1px; text-align: center; line-height: 1.8; max-width: 95vw; }
+
+/* Ending credits */
+#credits-scene { background: #000; overflow: hidden; }
+#creditsBg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.credits-viewport { width: 100%; height: 100%; position: absolute; overflow: hidden; pointer-events: none; }
+.credits-content {
+  position: absolute; left: 50%; top: 0; transform: translateX(-50%) translateY(2000px);
+  width: 85%; max-width: 650px; text-align: center; color: #d4cbb8;
+  font-size: 0.75rem; line-height: 2.4; text-shadow: 2px 2px 0 #000, 0 0 12px #000;
+}
+.credits-content h2 { color: #b84a39; font-size: 1.1rem; margin-bottom: 40px; letter-spacing: 2px; }
+.credits-content p { margin-bottom: 24px; }
+.credits-content blockquote { color: #e2a856; margin: 30px 0; font-style: italic; }
+.credits-content .stats { color: #7a828e; font-size: 0.6rem; }
+.credits-footer-btn { position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%); z-index: 10; opacity: 0; pointer-events: none; transition: opacity 2s; }
+.credits-footer-btn.show { opacity: 1; pointer-events: auto; }
+.skip-hint { position: absolute; top: 14px; right: 16px; font-size: 0.45rem; color: #596270; z-index: 5; }
