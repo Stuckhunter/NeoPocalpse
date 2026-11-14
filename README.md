@@ -10,6 +10,10 @@ blaster-l
 sprint-shifit
 swing s
 
+Fight to survive in this world of technology and cosmic horror.
+
+
+
 https://stuck-hunter.itch.io/neopocalpyse
 
 
