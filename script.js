@@ -175,6 +175,28 @@ function drawSurvivor(ctx, ex, ey) {
   ctx.fillStyle = '#64748b'; ctx.fillRect(ex + 24, ey + 18, 18, 4);
   ctx.restore();
 }
+function drawRedBlob(ctx, ex, ey) {
+  ctx.save();
+  ctx.fillStyle = '#dc2626'; ctx.beginPath();
+  ctx.moveTo(ex, ey + 24); ctx.quadraticCurveTo(ex + 2, ey + 5, ex + 15, ey + 8);
+  ctx.quadraticCurveTo(ex + 31, ey + 1, ex + 36, ey + 24);
+  ctx.quadraticCurveTo(ex + 18, ey + 33, ex, ey + 24); ctx.fill();
+  ctx.fillStyle = '#fff1f2'; ctx.fillRect(ex + 9, ey + 15, 6, 7); ctx.fillRect(ex + 22, ey + 15, 6, 7);
+  ctx.fillStyle = '#450a0a'; ctx.fillRect(ex + 11, ey + 17, 3, 5); ctx.fillRect(ex + 24, ey + 17, 3, 5);
+  ctx.restore();
+}
+function drawSurvivorBody(ctx, x, y) {
+  ctx.save(); ctx.translate(x, y); ctx.rotate(-0.04);
+  ctx.strokeStyle = '#64748b'; ctx.lineWidth = 6; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(-8, -10); ctx.lineTo(-28, -5); ctx.lineTo(-38, -7); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(6, -9); ctx.lineTo(24, -4); ctx.lineTo(36, -6); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(8, -8); ctx.lineTo(22, -1); ctx.lineTo(35, -1); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(-8, -8); ctx.lineTo(-20, -1); ctx.lineTo(-34, -1); ctx.stroke();
+  ctx.fillStyle = '#25617a'; ctx.fillRect(-10, -16, 22, 12);
+  ctx.fillStyle = '#94a3b8'; ctx.beginPath(); ctx.arc(-18, -13, 7, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = '#475569'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(-22, -14); ctx.lineTo(-15, -12); ctx.stroke();
+  ctx.restore();
+}
 function drawPebble(ctx, px, py) {
   ctx.save(); ctx.fillStyle = '#991b1b'; ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(px + 8, py - 12); ctx.lineTo(px + 18, py); ctx.closePath(); ctx.fill(); ctx.restore();
 }
@@ -189,12 +211,13 @@ function drawCyberTree(ctx, tx, ty, t) {
   ctx.fillRect(tx + 20, ty + 30, 4, 8); ctx.fillRect(tx + 22, ty + 70, 4, 8);
   ctx.restore();
 }
-const ENEMY_SIZE = { drone: [36, 30], crawler: [40, 34], zombie: [36, 48], survivor: [36, 48] };
-const ENEMY_COL = { drone: '#ef4444', crawler: '#ef4444', zombie: '#84cc16', survivor: '#38bdf8' };
+const ENEMY_SIZE = { drone: [36, 30], crawler: [40, 34], zombie: [36, 48], survivor: [36, 48], redblob: [36, 28] };
+const ENEMY_COL = { drone: '#ef4444', crawler: '#ef4444', zombie: '#84cc16', survivor: '#38bdf8', redblob: '#ef4444' };
 
 /* ============ ZONE DATA ============ */
 const G_ = (x, y, w) => [x, y, w, 50, 'g'];
 const S_ = (x, y, w, h = 18) => [x, y, w, h, 'p'];
+const B_ = (x, y, w, h = 24) => [x, y, w, h, 'b'];
 const ZONES = [
   { name: 'ZONE 1: ASHEN SECTOR', goal: 3800, bg: '#2b2b2b',
     pal: { g: '#242224', gt: '#4a4542', p: '#6e352c', pt: '#9e5447' }, hud: '#e2a856',
@@ -235,7 +258,20 @@ const ZONES = [
     platforms: [G_(0,400,500), S_(560,300,180), G_(820,400,700), S_(1600,280,160), G_(1840,400,2200)],
     enemies: [['survivor',620,352,560,720,1.8],['survivor',1100,352,820,1400,2],['survivor',2100,352,1900,2600,2.2]],
     cps: [1200, 2200], hint: 'The survivors think you are the machine | [J] Slash | [K] Dash | [L] Blaster | [Shift] Sprint' },
-  { name: 'ZONE 8: BLOOD DRIVE', goal: 3800, bg: '#450a0a', moon: true,
+  { name: 'ZONE 8: SLIME PITS', goal: 3400, bg: '#123324',
+    pal: { g: '#163b2a', gt: '#52d68a', p: '#1e4a35', pt: '#7af0aa' }, hud: '#7af0aa',
+    bounceVelocity: -19,
+    platforms: [G_(0,400,430), B_(500,360,110), S_(700,290,140), G_(900,400,360), B_(1320,340,120), S_(1510,250,140), G_(1730,400,380), B_(2160,330,130), S_(2370,240,150), G_(2610,400,850)],
+    enemies: [['redblob',740,262,700,800,1.3],['redblob',1050,372,930,1200,1.5],['redblob',1810,372,1750,2050,1.6],['redblob',2410,212,2370,2470,1.4]],
+    cps: [1700], hint: 'Use the bounce pads to launch across the slime pits | [J] Slash | [K] Dash | [L] Blaster' },
+  { name: 'ZONE 9: THE QUIET COAST', goal: 3200, bg: '#0b2430',
+    pal: { g: '#173744', gt: '#4a9b9b', p: '#173744', pt: '#4a9b9b' }, hud: '#8ecbd0',
+    safe: true, speed: 4.8, noSprint: true, whisperTypewriter: true,
+    platforms: [G_(0,400,3400)],
+    bodies: [2250,2510,2780],
+    whispers: [[350,'The coast is quiet. For once, nothing is chasing you.'],[950,'Keep walking. The tide has carried the signals away.'],[1570,'You followed their call all this way.'],[2130,'Those shapes on the shore... they are the survivors.'],[2620,'They did not make it. You are too late.']],
+    enemies: [], cps: [], hint: 'Walk along the coast. You are safe here.' },
+  { name: 'ZONE 10: BLOOD DRIVE', goal: 3800, bg: '#450a0a', moon: true,
     pal: { g: '#5c1010', gt: '#ef4444', p: '#5c1010', pt: '#ef4444' }, hud: '#fca5a5',
     safe: true, speed: 2.0, jump: -10,
     platforms: [G_(0,400,4500)],
@@ -261,8 +297,14 @@ const STEPS = [
   { k:'z', z:5 },
   { k:'d', tag:'CHAPTER 07 // THE MIRROR LAND', text:'You step into the reflecting canyons of Mirror Land. Paranoiac human survivors dwell here—they mistake you for an AI threat and will attack on sight!', btn:'ENTER MIRROR LAND' },
   { k:'z', z:6 },
-  { k:'d', tag:'CHAPTER 08 // THE BLOOD DRIVE', text:'A peaceful, slow-paced crimson highway. Take a slow walk across the red terrain; pebbles line your path, but you cannot be harmed here.', btn:'ENTER BLOOD DRIVE' },
+  { k:'d', tag:'CHAPTER 08 // THE SLIME PITS', text:'The ground is alive with hostile red blobs. Use the bounce pads to launch over the pits and clear a path through them.', btn:'ENTER THE SLIME PITS' },
   { k:'z', z:7 },
+  { k:'d', tag:'CHAPTER 09 // THE QUIET COAST', text:'The coast is calm, and nothing here can hurt you. Walk on. The words in the wind may explain what happened to the survivors.', btn:'WALK THE COAST' },
+  { k:'z', z:8 },
+  { k:'d', tag:'INTERLUDE // THE BLOOD DRIVE', text:'At last, you reach the Blood Drive. Kystos falls to his knees, overcome by grief.', btn:'CONTINUE' },
+  { k:'kneel' },
+  { k:'d', tag:'CHAPTER 10 // THE BLOOD DRIVE', text:'When he is ready, Kystos rises and continues down the crimson highway. Take a slow walk; no one can harm you here.', btn:'ENTER BLOOD DRIVE' },
+  { k:'z', z:9 },
   { k:'credits' }
 ];
 
@@ -282,6 +324,7 @@ function nextStep() {
   if (s.k === 'd') startDialog(s);
   else if (s.k === 'z') startZone(s.z);
   else if (s.k === 'boat') startBoat();
+  else if (s.k === 'kneel') startKneel();
   else if (s.k === 'credits') startCredits();
 }
 function clickBtn(fn) { return e => { e.currentTarget.blur(); fn(); }; }
@@ -356,6 +399,7 @@ function initLevel(zi) {
     anchors: (cfg.anchors || []).map(a => ({ x: a[0], y: a[1] })),
     lasers: (cfg.lasers || []).map(a => ({ x: a[0], y: a[1], h: a[2], on: true, timer: 0 })),
     pebbles: cfg.pebbles || [],
+    bodies: (cfg.bodies || []).map(x => ({ x, y: 400 })),
     cps: (cfg.cps || []).map(x => Object.assign(snapCheckpoint(plats, x), { hit: false })),
     cp: { x: 150, y: 346 },
     cam: 0, prevCam: 0, shake: 0, hit: 0, flash: 0, t: 0, over: false, paused: false, clearT: 0,
@@ -487,9 +531,15 @@ function updatePlayer(L) {
   const wasG = P.grounded; P.grounded = false;
   for (const p of L.plats) {
     if (P.worldX + 6 < p.x + p.w && P.worldX + P.w - 6 > p.x && P.vy >= 0 && P.prevY + P.h <= p.y + 6 && P.y + P.h >= p.y) {
-      if (!wasG && P.vy > 5) burst(L, P.worldX + 18, p.y, '#8a8478', 6, 1.8, 2, 16, 0.02);
-      P.y = p.y - P.h; P.vy = 0; P.grounded = true;
-      if (P.slam) { P.slam = false; slamImpact(L); }
+      if (p.type === 'b') {
+        P.y = p.y - P.h; P.vy = cfg.bounceVelocity || -19; P.airJumps = 0; P.coyote = 0; P.slam = false;
+        burst(L, P.worldX + 18, p.y, '#fb7185', 12, 3, 3, 22, 0.04);
+        sfx(360, 0.16, 'triangle', 0.06, 420);
+      } else {
+        if (!wasG && P.vy > 5) burst(L, P.worldX + 18, p.y, '#8a8478', 6, 1.8, 2, 16, 0.02);
+        P.y = p.y - P.h; P.vy = 0; P.grounded = true;
+        if (P.slam) { P.slam = false; slamImpact(L); }
+      }
     }
   }
   if (P.y > 520) die(L, true);
@@ -548,7 +598,13 @@ function updateFx(L) {
   L.ghosts = L.ghosts.filter(g => g.life > 0);
   if (L.shake > 0) L.shake = Math.max(0, L.shake - 1);
   if (L.flash > 0) L.flash = Math.max(0, L.flash - 0.05);
-  if (L.whisper) { L.whisper.t--; if (L.whisper.t <= 0) L.whisper = null; }
+  if (L.whisper) {
+    if (L.cfg.whisperTypewriter && L.whisper.i < L.whisper.text.length) {
+      L.whisper.i = Math.min(L.whisper.text.length, L.whisper.i + 0.8);
+    }
+    L.whisper.t--;
+    if (L.whisper.t <= 0) L.whisper = null;
+  }
 }
 function setHud(L) {
   const P = L.P, cfg = L.cfg;
@@ -595,7 +651,7 @@ function updateZone() {
 
   // whispers (safe zone)
   if (cfg.whispers && L.wIdx < cfg.whispers.length && P.worldX > cfg.whispers[L.wIdx][0]) {
-    L.whisper = { text: cfg.whispers[L.wIdx][1], t: 200 }; L.wIdx++;
+    L.whisper = { text: cfg.whispers[L.wIdx][1], t: 200, i: 0 }; L.wIdx++;
   }
 
   // slash hitbox vs trees
@@ -682,11 +738,23 @@ function drawLevel(L) {
     const rx = p.x - cam;
     if (rx + p.w < -100 || rx > W + 100) continue;
     const ground = p.type === 'g';
-    cx.fillStyle = ground ? pal.g : pal.p; cx.fillRect(rx, p.y, p.w, ground ? H - p.y + 20 : p.h);
-    cx.fillStyle = ground ? pal.gt : pal.pt; cx.fillRect(rx, p.y, p.w, ground ? 6 : 4);
+    const bounce = p.type === 'b';
+    cx.fillStyle = ground ? pal.g : bounce ? '#7f1d1d' : pal.p; cx.fillRect(rx, p.y, p.w, ground ? H - p.y + 20 : p.h);
+    cx.fillStyle = ground ? pal.gt : bounce ? '#fb7185' : pal.pt; cx.fillRect(rx, p.y, p.w, ground ? 6 : 4);
+    if (bounce) {
+      cx.fillStyle = '#fecdd3';
+      for (let x = 10; x < p.w - 8; x += 16) cx.fillRect(rx + x, p.y + 8, 4, p.h - 12);
+      cx.strokeStyle = '#ffe4e6'; cx.lineWidth = 3; cx.beginPath();
+      cx.moveTo(rx + p.w / 2 - 7, p.y - 5); cx.lineTo(rx + p.w / 2, p.y - 12); cx.lineTo(rx + p.w / 2 + 7, p.y - 5); cx.stroke();
+    }
     cx.fillStyle = 'rgba(0,0,0,.25)';
     for (let x = Math.max(0, Math.floor(-rx / 40)) * 40; x < p.w; x += 40) { if (rx + x > W) break; cx.fillRect(rx + x, p.y + 8, 2, ground ? 40 : p.h - 8); }
     cx.globalAlpha = 0.25; cx.fillStyle = ground ? pal.gt : pal.pt; cx.fillRect(rx, p.y + (ground ? 6 : 4), p.w, 3); cx.globalAlpha = 1;
+  }
+
+  for (const body of L.bodies) {
+    const x = body.x - cam;
+    if (x > -60 && x < W + 60) drawSurvivorBody(cx, x, body.y);
   }
 
   // checkpoints
@@ -739,7 +807,8 @@ function drawLevel(L) {
     cx.save();
     if (en.t !== 'drone' && en.dir < 0) { cx.translate(ex + en.w / 2, 0); cx.scale(-1, 1); cx.translate(-(ex + en.w / 2), 0); }
     if (en.t === 'drone') drawDrone(cx, ex, ey); else if (en.t === 'crawler') drawCrawler(cx, ex, ey);
-    else if (en.t === 'zombie') drawZombie(cx, ex, ey); else drawSurvivor(cx, ex, ey);
+    else if (en.t === 'zombie') drawZombie(cx, ex, ey); else if (en.t === 'redblob') drawRedBlob(cx, ex, ey);
+    else drawSurvivor(cx, ex, ey);
     cx.restore();
   }
 
@@ -820,7 +889,11 @@ function renderZone() {
     centerText(L.cfg.name, 120, 16, L.cfg.hud);
     cx.globalAlpha = 1;
   }
-  if (L.whisper) { cx.globalAlpha = Math.min(1, L.whisper.t / 40, (200 - L.whisper.t) / 30); centerText(L.whisper.text, 90, 11, '#fecaca'); cx.globalAlpha = 1; }
+  if (L.whisper) {
+    cx.globalAlpha = Math.min(1, L.whisper.t / 40, (200 - L.whisper.t) / 30);
+    const text = L.cfg.whisperTypewriter ? L.whisper.text.slice(0, Math.floor(L.whisper.i)) : L.whisper.text;
+    centerText(text, 90, 11, '#fecaca'); cx.globalAlpha = 1;
+  }
   if (L.clearT > 0) { cx.fillStyle = 'rgba(0,0,0,.45)'; cx.fillRect(0, 0, W, H); centerText('ZONE CLEAR', 200, 22, '#fde68a'); centerText('SCORE ' + score, 245, 11, '#d4cbb8'); }
   if (L.over) { cx.fillStyle = 'rgba(0,0,0,.7)'; cx.fillRect(0, 0, W, H); centerText('GAME OVER', 190, 24, '#ef4444'); centerText('[ENTER] RETRY ZONE', 250, 10, '#e2a856'); centerText('[ESC] TITLE', 280, 10, '#7a828e'); }
   if (L.paused) {
@@ -889,6 +962,63 @@ function renderBoat() {
   cx.fillStyle = 'rgba(0,0,0,.12)'; for (let y = 0; y < H; y += 3) cx.fillRect(0, y, W, 1);
 }
 
+/* ============ KYSTOS CINEMATIC ============ */
+const K = { t: 0 };
+function startKneel() {
+  mode = 'kneel'; showScene('game-scene');
+  $('game-scene').style.background = '#450a0a';
+  $('hZone').textContent = 'CINEMATIC // THE BLOOD DRIVE';
+  $('hLives').textContent = ''; $('hDist').textContent = '';
+  $('hScore').textContent = ''; $('hCombo').textContent = ''; $('hCd').textContent = '';
+  $('drone-upload-label').style.display = 'none';
+  $('hint').textContent = 'Press [ENTER] when you are ready to continue.';
+  K.t = 0;
+}
+function updateKneel() {
+  K.t++;
+  if (pressed.KeyM) muted = !muted;
+  if (pressed.Enter || pressed.Space) nextStep();
+}
+function drawKneelingKystos(g, x, ground, t) {
+  g.save(); g.translate(x, ground);
+  g.fillStyle = 'rgba(0,0,0,.35)'; g.beginPath(); g.ellipse(0, -2, 55, 9, 0, 0, Math.PI * 2); g.fill();
+  g.fillStyle = '#241936'; g.beginPath();
+  g.moveTo(-8, -72); g.lineTo(-24, -54); g.lineTo(-60, -8); g.lineTo(-28, -3); g.lineTo(-3, -36); g.closePath(); g.fill();
+  g.strokeStyle = '#181524'; g.lineWidth = 15; g.lineCap = 'round'; g.lineJoin = 'round';
+  g.beginPath(); g.moveTo(-5, -38); g.lineTo(-24, -17); g.lineTo(-38, -5); g.lineTo(-20, -5); g.stroke();
+  g.beginPath(); g.moveTo(5, -38); g.lineTo(26, -23); g.lineTo(29, -5); g.lineTo(46, -5); g.stroke();
+  g.fillStyle = '#14111f'; g.beginPath();
+  g.moveTo(-14, -78); g.lineTo(12, -78); g.lineTo(17, -42); g.lineTo(-5, -32); g.lineTo(-20, -48); g.closePath(); g.fill();
+  g.strokeStyle = '#241936'; g.lineWidth = 8;
+  g.beginPath(); g.moveTo(-11, -68); g.lineTo(-8, -87); g.lineTo(-1, -92); g.stroke();
+  g.beginPath(); g.moveTo(11, -68); g.lineTo(8, -87); g.lineTo(2, -92); g.stroke();
+  g.fillStyle = '#261b38'; g.fillRect(-13, -111, 26, 27);
+  g.fillStyle = '#473366'; g.fillRect(-12, -111, 24, 4);
+  g.fillStyle = '#09070f'; g.fillRect(-7, -101, 16, 10);
+  g.fillStyle = '#c084fc'; g.fillRect(-5, -98, 11, 3);
+  const tear = (t % 48) / 48 * 17;
+  g.strokeStyle = '#38bdf8'; g.lineWidth = 2;
+  g.beginPath(); g.moveTo(-5, -89); g.lineTo(-5, -89 + tear); g.stroke();
+  g.beginPath(); g.moveTo(5, -89); g.lineTo(5, -89 + Math.max(0, tear - 8)); g.stroke();
+  g.fillStyle = '#7dd3fc'; g.beginPath(); g.arc(-5, -89 + tear, 2, 0, Math.PI * 2); g.fill();
+  g.restore();
+}
+function renderKneel() {
+  cx.clearRect(0, 0, W, H);
+  const sky = cx.createLinearGradient(0, 0, 0, H);
+  sky.addColorStop(0, '#170608'); sky.addColorStop(1, '#450a0a');
+  cx.fillStyle = sky; cx.fillRect(0, 0, W, H);
+  const glow = cx.createRadialGradient(620, 105, 18, 620, 105, 105);
+  glow.addColorStop(0, 'rgba(255,230,210,.25)'); glow.addColorStop(1, 'rgba(255,230,210,0)');
+  cx.fillStyle = glow; cx.fillRect(515, 0, 210, 210);
+  cx.fillStyle = '#f5d6c8'; cx.beginPath(); cx.arc(620, 105, 34, 0, Math.PI * 2); cx.fill();
+  cx.fillStyle = '#5c1010'; cx.fillRect(0, 365, W, 85);
+  cx.fillStyle = '#ef4444'; cx.fillRect(0, 365, W, 4);
+  centerText('THE SURVIVORS ARE GONE', 95, 10, '#fecaca');
+  drawKneelingKystos(cx, W / 2, 365, K.t);
+  cx.fillStyle = 'rgba(0,0,0,.12)'; for (let y = 0; y < H; y += 3) cx.fillRect(0, y, W, 1);
+}
+
 /* ============ ENDING: SLOW SCROLLING STORY ============ */
 const C = { y: 0, t: 0, end: false, endT: 0, stars: [], kx: -80 };
 function startCredits() {
@@ -949,11 +1079,13 @@ function stepOnce() {
   else if (mode === 'dialog') updateDialog();
   else if (mode === 'zone') updateZone();
   else if (mode === 'boat') updateBoat();
+  else if (mode === 'kneel') updateKneel();
   else if (mode === 'credits') updateCredits();
 }
 function render() {
   if (mode === 'zone') renderZone();
   else if (mode === 'boat') renderBoat();
+  else if (mode === 'kneel') renderKneel();
   else if (mode === 'credits') renderCredits();
 }
 let last = performance.now(), acc = 0;
